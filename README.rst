@@ -2,7 +2,8 @@
 Rolling your own neural network framework
 =========================================
 
-LiFT stands for LIsp-Flavoured Tensor.
+LiFT stands for LIsp-Flavoured Tensor, following the trend of LFE in
+naming.
 
 * `a simple example with autograd <autograd.rst>`__
 * `tensor and rank <tensor.rst>`__
