@@ -2,11 +2,11 @@
 a simple example with autograd
 ==============================
 
-Neural network is very popular these days. There are a great number of
-tutorials on how to build a neural network. Very sad, most of them are
-too complicated for me. I don't see how artificial neural network has
-anything to do with layers of neurons. Fortunately, there is autograd,
-which does not force you to think in layers.
+There are a great number of tutorials on how to build a neural
+network. Very sad, most of them are too complicated for me. I don't
+see how artificial neural network has anything to do with layers of
+neurons. Fortunately, there is autograd, which does not force me to
+think in layers.
 
 Let's begin with a simple example [#]_ . For convenience, we will
 stick to this example in the first part of this tutorial. But we don't
