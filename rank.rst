@@ -19,7 +19,8 @@ ranks, so that it could be flexible with very simple implementation.
 
 .. [#] http://www.jsoftware.com/help/learning/07.htm
 
-First of all, let's define Array and ArrayView.
+
+First, let's define Array and ArrayView.
 
 .. code::
 
@@ -50,3 +51,72 @@ First of all, let's define Array and ArrayView.
 
         def view(self):
             return ArrayView(self.data, 0, len(self.data))
+
+        def __eq__(self, other):
+            return (self.shape == other.shape) and (self.data == other.data)
+
+
+This is a multidimensional array in C.
+
+.. code::
+
+    int a[2][3] = {{1,2,3},{4,5,6}};
+
+
+And this is the equivalent array in LiFT.
+
+.. code::
+
+    Array((3,2),[1,2,3,4,5,6])
+
+monad
+
+.. code::
+
+    def product(l):
+        x = 1
+        for e in l:
+            x *= e
+        return x
+
+    def interp_monad(op, ry, y):
+        if ry is None:
+            ry = len(y.shape)
+
+        shape = op.get_shape(y.shape[:ry]) + y.shape[ry:]
+        z = Array(shape, [0.0 for _ in xrange(product(shape))])
+
+        vy = y.view()
+        vz = z.view()
+
+        p = product(y.shape[ry:])
+        for i in xrange(p):
+            op.interp(y.shape[:ry], vy.subview(i,p), vz.subview(i,p))
+
+        return z
+
+sum
+
+.. code::
+
+    class Sum(object):
+        rank = None
+
+        def get_shape(self, sy):
+            return sy[:-1]
+
+        def interp(self, sy, vy, vz):
+            p = product(sy[:-1])
+            for i in xrange(p):
+                vz[i] = 0
+
+            for i in xrange(sy[-1]):
+                vyi = vy.subview(i, sy[-1])
+                for j in xrange(p):
+                    vz[j] += vyi[j]
+
+    assert interp_monad(Sum(), 1, Array((2,),[1,2])) == Array((),[3])
+    assert interp_monad(Sum(), 1, Array((3,),[1,2,3])) == Array((),[6])
+
+    assert interp_monad(Sum(), 1, Array((2,2),[1,2,3,4])) == Array((2,),[3,7])
+    assert interp_monad(Sum(), 2, Array((2,2),[1,2,3,4])) == Array((2,),[4,6])
