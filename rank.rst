@@ -67,9 +67,59 @@ And this is the equivalent array in LiFT.
 
 .. code::
 
-    Array((3,2),[1,2,3,4,5,6])
+    a = Array((3,2),[1,2,3,4,5,6])
 
-monad
+
+
+Let's take a look at a simple monad, sum. Sum takes an array of rank
+:math:`n` as argument, and returns an array of rank :math:`n-1`. For
+example,
+
+.. code::
+
+    sum of Array((3,), [1,2,3])
+    1 + 2 + 3 = 6
+
+    sum of Array((3,2), [1,2,3,4,5,6])
+    1  2  3
+    +  +  +
+    4  5  6
+    -------
+    5  7  9
+
+What if we want to calculate sum of each rank-1 array in a rank-2
+array.
+
+.. code::
+
+    sum"1 of Array((3,2), [1,2,3,4,5,6])
+    1 + 2 + 3 = 6
+    4 + 5 + 6 = 15
+
+
+Sum can be defined like this
+
+.. code::
+
+    class Sum(object):
+        rank = None
+
+        def get_shape(self, sy):
+            return sy[:-1]
+
+        def interp(self, sy, vy, vz):
+            p = product(sy[:-1])
+            for i in xrange(p):
+                vz[i] = 0
+
+            for i in xrange(sy[-1]):
+                vyi = vy.subview(i, sy[-1])
+                for j in xrange(p):
+                    vz[j] += vyi[j]
+
+
+We first calculate the product of the dimensions, so that we could use
+just a single loop.
 
 .. code::
 
@@ -95,28 +145,73 @@ monad
 
         return z
 
-sum
+
 
 .. code::
 
-    class Sum(object):
-        rank = None
-
-        def get_shape(self, sy):
-            return sy[:-1]
-
-        def interp(self, sy, vy, vz):
-            p = product(sy[:-1])
-            for i in xrange(p):
-                vz[i] = 0
-
-            for i in xrange(sy[-1]):
-                vyi = vy.subview(i, sy[-1])
-                for j in xrange(p):
-                    vz[j] += vyi[j]
-
-    assert interp_monad(Sum(), 1, Array((2,),[1,2])) == Array((),[3])
     assert interp_monad(Sum(), 1, Array((3,),[1,2,3])) == Array((),[6])
+    assert interp_monad(Sum(), 2, Array((3,2),[1,2,3,4,5,6])) == Array((3,),[5,7,9])
+    assert interp_monad(Sum(), 1, Array((3,2),[1,2,3,4,5,6])) == Array((2,),[6,15])
 
-    assert interp_monad(Sum(), 1, Array((2,2),[1,2,3,4])) == Array((2,),[3,7])
-    assert interp_monad(Sum(), 2, Array((2,2),[1,2,3,4])) == Array((2,),[4,6])
+
+As with J, verb(function)s have intrinsic ranks, and you can also
+create verb(function)s with different ranks using double-quote. So we
+have to support nested ranks, and we use :code:`None` to represent
+rank infinity.
+
+.. code::
+
+    def get_shape_monad(op, ranks, sy):
+        if not ranks:
+            ry = op.rank
+            inner = op.get_shape
+        else:
+            ry = ranks[-1]
+
+            def inner(sy):
+                return get_shape_monad(op, ranks[:-1], sy)
+
+        if ry is None:
+            ry = len(sy)
+
+        return inner(sy[:ry]) + sy[ry:]
+
+
+    def interp_monad(op, ranks, sy, vy, vz):
+        if not ranks:
+            ry = op.rank
+            inner = op.interp
+        else:
+            ry = ranks[-1]
+            def inner(sy, vy, vz):
+                interp_monad(op, ranks[:-1], sy, vy, vz)
+
+        if ry is None:
+            ry = len(sy)
+
+        p = product(sy[ry:])
+        for i in xrange(p):
+            inner(sy[:ry], vy.subview(i, p),
+                  vz.subview(i, p))
+
+
+    def rankex1(op, ranks, y):
+        shape = get_shape_monad(op, ranks, y.shape)
+        z = Array(shape, [0.0 for _ in xrange(product(shape))])
+        interp_monad(op, ranks, y.shape, y.view(), z.view())
+        return z
+
+
+Since verb(function)s have intrinsic ranks, we don't have specify
+ranks in first two examples.
+
+.. code::
+
+    assert rankex1(Sum(), (), Array((3,),[1,2,3])) == Array((),[6])
+    assert rankex1(Sum(), (), Array((3,2),[1,2,3,4,5,6])) == Array((3,),[5,7,9])
+    assert rankex1(Sum(), (1,), Array((3,2),[1,2,3,4,5,6])) == Array((2,),[6,15])
+
+
+Similarly, dyad has one rank for the left argument, and another one
+for the right. What about the dimensions not taken by dyad. They have
+to agree, i.e., 

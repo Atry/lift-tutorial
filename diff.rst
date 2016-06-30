@@ -7,7 +7,7 @@ find on the internet, but few of them talks about reverse mode
 automatic differentiation. Reverse mode is just as simple as forward
 mode.
 
-A very simple example with only monad.
+A very simple example with only monads.
 
 .. math::
 
@@ -16,6 +16,9 @@ A very simple example with only monad.
     v_3 &=& g(v_2) \\
     v_4 &=& h(v_3) \\
     \end{array}
+
+
+In reverse mode, 
 
 :math:`\frac{\partial v_4}{\partial v_1} = \frac{\partial v_4}{\partial v_3} \cdot \frac{\partial v_3}{\partial v_2} \cdot \frac{\partial v_2}{\partial v_1}`
 

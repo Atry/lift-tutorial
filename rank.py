@@ -30,6 +30,23 @@ class Array(object):
         return (self.shape == other.shape) and (self.data == other.data)
 
 
+class Sum(object):
+    rank = None
+
+    def get_shape(self, sy):
+        return sy[:-1]
+
+    def interp(self, sy, vy, vz):
+        p = product(sy[:-1])
+        for i in xrange(p):
+            vz[i] = 0
+
+        for i in xrange(sy[-1]):
+            vyi = vy.subview(i, sy[-1])
+            for j in xrange(p):
+                vz[j] += vyi[j]
+
+
 def product(l):
     x = 1
     for e in l:
@@ -51,28 +68,9 @@ def interp_monad(op, ry, y):
     return z
 
 
-class Sum(object):
-    rank = None
-
-    def get_shape(self, sy):
-        return sy[:-1]
-
-    def interp(self, sy, vy, vz):
-        p = product(sy[:-1])
-        for i in xrange(p):
-            vz[i] = 0
-
-        for i in xrange(sy[-1]):
-            vyi = vy.subview(i, sy[-1])
-            for j in xrange(p):
-                vz[j] += vyi[j]
-
-
-assert interp_monad(Sum(), 1, Array((2,),[1,2])) == Array((),[3])
 assert interp_monad(Sum(), 1, Array((3,),[1,2,3])) == Array((),[6])
-
-assert interp_monad(Sum(), 1, Array((2,2),[1,2,3,4])) == Array((2,),[3,7])
-assert interp_monad(Sum(), 2, Array((2,2),[1,2,3,4])) == Array((2,),[4,6])
+assert interp_monad(Sum(), 2, Array((3,2),[1,2,3,4,5,6])) == Array((3,),[5,7,9])
+assert interp_monad(Sum(), 1, Array((3,2),[1,2,3,4,5,6])) == Array((2,),[6,15])
 
 
 def get_shape_monad(op, ranks, sy):
@@ -116,11 +114,9 @@ def rankex1(op, ranks, y):
     return z
 
 
-assert rankex1(Sum(), (), Array((2,),[1,2])) == Array((),[3])
 assert rankex1(Sum(), (), Array((3,),[1,2,3])) == Array((),[6])
-
-assert rankex1(Sum(), (1,), Array((2,2),[1,2,3,4])) == Array((2,),[3,7])
-assert rankex1(Sum(), (), Array((2,2),[1,2,3,4])) == Array((2,),[4,6])
+assert rankex1(Sum(), (), Array((3,2),[1,2,3,4,5,6])) == Array((3,),[5,7,9])
+assert rankex1(Sum(), (1,), Array((3,2),[1,2,3,4,5,6])) == Array((2,),[6,15])
 
 
 def agree(sx, sy):
