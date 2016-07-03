@@ -20,6 +20,10 @@ tensor and gradient based optimization.
 
 * `a simple example with autograd <autograd.rst>`__
 * `tensor and rank <rank.rst>`__
-* `automatic differentiation <diff.rst>`__
+* `automatic differentiation <diff1.rst>`__
 * `shape checking <shape.rst>`__
 * `backpropagation, reverse mode automatic differentiation <diff2.rst>`__
+
+Compiling
+
+Convolution

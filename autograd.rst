@@ -97,5 +97,5 @@ the new weights and biases
             [ [0.35891648, 0.408666186],
               [0.511301270, 0.561370121]]))
 
-As you can see, just simple formulas and optimization with gradient
-based method, no layers are required.
+As you see, just simple formulas and optimization with gradient based
+method, no layers are required.

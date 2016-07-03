@@ -42,16 +42,16 @@ def diff(vars, acc, v, w):
     v = vars[v]
     if v[0] == 'in':
         return 0
-    elif v[0] == "sin":
-        return diff(vars, vars.add("*", acc, vars.add("cos", v[1])), v[1], w)
+    elif v[0] == 'sin':
+        return diff(vars, vars.add('*', acc, vars.add('cos', v[1])), v[1], w)
     elif v[0] == '+':
         gx = diff(vars, acc, v[1], w)
         gy = diff(vars, acc, v[2], w)
-        return vars.add("+", gx, gy)
+        return vars.add('+', gx, gy)
     elif v[0] == '*':
-        gx = diff(vars, vars.add("*", v[2], acc), v[1], w)
-        gy = diff(vars, vars.add("*", v[1], acc), v[2], w)
-        return vars.add("+", gx, gy)
+        gx = diff(vars, vars.add('*', v[2], acc), v[1], w)
+        gy = diff(vars, vars.add('*', v[1], acc), v[2], w)
+        return vars.add('+', gx, gy)
 
     raise NotImplementedError
 
@@ -64,20 +64,20 @@ def autodiff(vars, v, *wrt):
 
 vars = Vars()
 
-x = vars.add("in",1)
+x = vars.add('in', 'x')
 assert x == 'v1'
-assert vars['v1'] == ('in',1)
+assert vars['v1'] == ('in', 'x')
 
-y = vars.add("in",2)
+y = vars.add('in', 'y')
 assert y == 'v2'
-assert vars['v2'] == ('in',2)
+assert vars['v2'] == ('in', 'y')
 
-z = vars.add("+", vars.add("*",x,y),vars.add("sin",x))
+z = vars.add('+', vars.add('*',x,y), vars.add('sin',x))
 assert z == 'v5'
-assert vars['v3'] == ('*','v1','v2')
+assert vars['v3'] == ('*', 'v1', 'v2')
 assert vars['v4'] == ('sin', 'v1')
 assert vars['v5'] == ('+', 'v3', 'v4')
 
-assert autodiff(vars, z, x, y) ==  ('v7','v1')
+assert autodiff(vars, z, x, y) ==  ('v7', 'v1')
 assert vars['v6'] == ('cos', 'v1')
-assert vars['v7'] == ('+','v2','v6')
+assert vars['v7'] == ('+', 'v2', 'v6')
