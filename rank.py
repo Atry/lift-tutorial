@@ -174,10 +174,9 @@ def interp_dyad(op, ranks, sx, vx, sy, vy, vz):
 
         for i in xrange(common):
             for j in xrange(extra):
-                inner(
-                    sx[:rx], vx.subview(i*extra+j, px),
-                    sy[:ry], vy.subview(i, py),
-                    vz.subview(i*extra+j, px))
+                inner(sx[:rx], vx.subview(i*extra+j, px),
+                      sy[:ry], vy.subview(i, py),
+                      vz.subview(i*extra+j, px))
 
 
 def rankex2(op, ranks, x, y):

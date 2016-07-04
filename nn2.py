@@ -32,4 +32,4 @@ values = interp(
     Input = Array((2,), [0.05,0.10]))
 
 assert (values[table.symbols["Output"]]
-        .isAlmostEqual(Array((2,), [0.75136507,0.772928465])))
+        .allclose(Array((2,), [0.75136507,0.772928465])))

@@ -33,7 +33,7 @@ class Array(object):
     def __eq__(self, other):
         return (self.shape == other.shape) and (self.data == other.data)
 
-    def isAlmostEqual(self, other):
+    def allclose(self, other):
         return (self.shape == other.shape) and all(round(abs(x-y),7)==0 for x, y in zip(self.data,other.data))
 
 
@@ -87,10 +87,9 @@ def interp_dyad(op, ranks, sx, vx, sy, vy, vz):
 
         for i in xrange(common):
             for j in xrange(extra):
-                inner(
-                    sx[:rx], vx.subview(i*extra+j, px),
-                    sy[:ry], vy.subview(i, py),
-                    vz.subview(i*extra+j, px))
+                inner(sx[:rx], vx.subview(i*extra+j, px),
+                      sy[:ry], vy.subview(i, py),
+                      vz.subview(i*extra+j, px))
 
 
 def interp(table, **kwargs):

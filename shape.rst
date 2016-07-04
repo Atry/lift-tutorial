@@ -26,11 +26,15 @@ always use parenthesis. This is why it is lisp flavoured.
     Hidden := (sigmoid ((W1 dot Input) + B1))
     Output := (sigmoid ((W2 dot Hidden) + B2))
 
+In the definition of a monad, :code:`y` means the argument. While in
+the definition of a dyad, :code:`x` means the left argument, :code:`y`
+means the right argument.
 
-extended reduce
+We have extended reduce (called insert in J) to multiple
+dimensions. :code:`(reduce 1 +)` means 1-dimension reduce, is
+equivalent to :code:`+/` of J.
 
-
-Shape is checked, when a new declaration or definition added to symbol
+Shape is checked when a new declaration or definition added to symbol
 table. If we could not find a symbol in the symbols, we would try to
 find it in the declarations, see if it is an input.
 
@@ -87,3 +91,43 @@ We use the same :code:`Array`, :code:`interp_monad`,
 :code:`interp_dyad` as :code:`rank.py` here. So after shape checking,
 we transform the statements into a simpler form which is also required
 by our implementation of reverse mode automatic differentiation.
+
+Let's calculate the output.
+
+.. code::
+
+    from lift1.parser import Parser
+    from lift1.check import check_stmts
+    from lift1.interp import interp
+    from lift1.interp import Array
+
+    p = Parser(filename='<string>')
+
+    SOURCE = (
+    """
+    Input :: (in 2)
+    W1 :: (in 2 2)
+    B1 :: (in)
+    W2 :: (in 2 2)
+    B2 :: (in)
+    Output :: (out 2)
+
+    sigmoid"0 := (1 / ((exp (0 - y)) + 1))
+    dot"1 1 := ((reduce 1 +) (x * y))
+
+    Hidden := (sigmoid ((W1 dot Input) + B1))
+    Output := (sigmoid ((W2 dot Hidden) + B2))
+    """)
+
+
+    table = check_stmts(p.parse(SOURCE))
+    values = interp(
+        table,
+        W1 = Array((2,2), [0.15,0.20,0.25,0.30]),
+        B1 = Array((), [0.35]),
+        W2 = Array((2,2), [0.40,0.45,0.50,0.55]),
+        B2 = Array((), [0.60]),
+        Input = Array((2,), [0.05,0.10]))
+
+    assert (values[table.symbols["Output"]]
+            .allclose(Array((2,), [0.75136507,0.772928465])))

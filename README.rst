@@ -15,15 +15,14 @@ neural network framework. And LiFT does not limit itself to neural
 network, it could also be a good choice for other areas which need
 tensor and gradient based optimization.
 
-
 .. __: http://lfe.io/
 
 * `a simple example with autograd <autograd.rst>`__
 * `tensor and rank <rank.rst>`__
 * `automatic differentiation <diff1.rst>`__
 * `shape checking <shape.rst>`__
-* `backpropagation, reverse mode automatic differentiation <diff2.rst>`__
+* `backpropagation <diff2.rst>`__
 
-Compiling
+Compilation
 
 Convolution
