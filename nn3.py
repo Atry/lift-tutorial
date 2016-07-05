@@ -5,36 +5,8 @@ from lift2.interp import Array
 
 p = Parser(filename='<string>')
 
-SOURCE = (
-"""
-Input :: (in 2)
-W1 :: (in 2 2)
-B1 :: (in)
-W2 :: (in 2 2)
-B2 :: (in)
-Output :: (out 2)
-
-sigmoid"0 := (1 / ((exp (0 - y)) + 1))
-dot"1 1 := ((reduce 1 +) (x * y))
-
-Hidden := (sigmoid ((W1 dot Input) + B1))
-Output := (sigmoid ((W2 dot Hidden) + B2))
-
-Target :: (in 2)
-Loss :: (out)
-
-Loss := ((reduce 1 +) (0.5 * ((Target - Output) ** 2)))
-
-dW1 :: (grad Loss W1)
-dW2 :: (grad Loss W2)
-
-nW1 :: (out 2 2)
-nW2 :: (out 2 2)
-
-nW1 := (W1 - (0.5 * dW1))
-nW2 := (W2 - (0.5 * dW2))
-""")
-
+with open("nn.model", "r") as f:
+    SOURCE = f.read()
 
 table = check_stmts(p.parse(SOURCE))
 values = interp(

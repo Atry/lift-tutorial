@@ -39,9 +39,24 @@ derivative of :code:`x` with respect to :code:`y`.
     nW2 := (W2 - (0.5 * dW2))
 
 
-Backpropagation is just a kind of reverse mode automatic
-differentiation. To calculate the gradient, we use the backpropagation
-algorithm here.
+.. math::
+
+    \begin{array}{rclcrcl}
+    Z &=& F + G &,& \frac{\partial Z}{\partial X} &=& \frac{\partial F}{\partial X} + \frac{\partial G}{\partial X} \\
+    Z &=& F - G &,& \frac{\partial Z}{\partial X} &=& \frac{\partial F}{\partial X} - \frac{\partial G}{\partial X} \\
+    Z &=& F \cdot G &,& \frac{\partial Z}{\partial X} &=& G \cdot \frac{\partial F}{\partial X} + F \cdot \frac{\partial G}{\partial X} \\
+    Z &=& F \div G &,& \frac{\partial Z}{\partial X} &=& \frac{1}{G} \cdot \frac{\partial F}{\partial X} - \frac{F}{G^2} \cdot \frac{\partial G}{\partial X} \\
+    Z &=& F^G &,& \frac{\partial Z}{\partial X} &=& F^G \cdot (\frac{G}{F} \cdot \frac{\partial F}{\partial X} + \ln F \cdot \frac{\partial G}{\partial X})
+    \end{array}
+
+They are all in the form of :math:`A \cdot \frac{\partial F}{\partial
+X} + B \cdot \frac{\partial G}{\partial X}`. Instead of :math:`Acc
+\cdot (A \cdot \frac{\partial F}{\partial X} + B \cdot \frac{\partial
+G}{\partial X})`, we calculate :math:`(Acc \cdot A) \cdot
+\frac{\partial F}{\partial X} + (Acc \cdot B) \cdot \frac{\partial
+G}{\partial X}`. This is how backpropagation works. Backpropagation is
+just a kind of reverse mode automatic differentiation. Here, we use
+the backpropagation algorithm to calculate the gradient.
 
 .. code::
 

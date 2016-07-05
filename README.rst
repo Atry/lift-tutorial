@@ -12,17 +12,19 @@ problem solved.
 
 LiFT can be served as a good starting point of your full-fledged
 neural network framework. And LiFT does not limit itself to neural
-network, it could also be a good choice for other areas which need
-tensor and gradient based optimization.
+network, it could also be a good choice if you need tensor and
+gradient based optimization.
 
 .. __: http://lfe.io/
 
-* `a simple example with autograd <autograd.rst>`__
-* `tensor and rank <rank.rst>`__
-* `automatic differentiation <diff1.rst>`__
-* `shape checking <shape.rst>`__
-* `backpropagation <diff2.rst>`__
+* `a simple example with autograd <autograd.rst>`_
+* `tensor and rank <rank.rst>`_
+* `automatic differentiation <diff1.rst>`_
+* `shape checking <shape.rst>`_
+* `backpropagation <diff2.rst>`_
 
 Compilation
 
-Convolution
+* `integer set library <isl.rst>`_
+* `array contraction <contract.rst>`_
+* `operators for convolution <conv.rst>`_
