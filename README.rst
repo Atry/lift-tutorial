@@ -22,9 +22,9 @@ gradient based optimization.
 * `automatic differentiation <diff1.rst>`_
 * `shape checking <shape.rst>`_
 * `backpropagation <diff2.rst>`_
-
-Compilation
-
-* `integer set library <isl.rst>`_
+* `compilation with integer set library <isl.rst>`_
 * `array contraction <contract.rst>`_
 * `convolution <conv.rst>`_
+
+If you have any questions, find any mistakes or have any suggestions,
+feel free to open an issue of pull request.

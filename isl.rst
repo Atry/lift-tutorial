@@ -1,6 +1,6 @@
-===================
-integer set library
-===================
+====================================
+compilation with integer set library
+====================================
 
 We use `integer set library`__ and `islpy`__ a python binding of isl
 in compilation.
