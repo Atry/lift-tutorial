@@ -27,4 +27,4 @@ Compilation
 
 * `integer set library <isl.rst>`_
 * `array contraction <contract.rst>`_
-* `operators for convolution <conv.rst>`_
+* `convolution <conv.rst>`_

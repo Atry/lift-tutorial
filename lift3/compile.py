@@ -466,16 +466,16 @@ def compile(table):
             continue
 
         if isinstance(v, symbol.Literal):
-            ctx.const_arrays.add(name, v.shape)
+            ctx.const_arrays.add(name, v.shape[::-1])
             ctx.const_values[name] = tuple(float(n.n) for n in v.body)
             continue
         elif isinstance(v, symbol.Constant):
-            ctx.const_arrays.add(name, v.shape)
+            ctx.const_arrays.add(name, v.shape[::-1])
             ctx.const_values[name] = v.value
             continue
 
         if name not in ctx.output_arrays:
-            ctx.intermediate_arrays.add(name, v.shape)
+            ctx.intermediate_arrays.add(name, v.shape[::-1])
 
         if isinstance(v, symbol.ApplyMonad):
             compile_monad(

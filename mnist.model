@@ -1,0 +1,31 @@
+Input :: (in 24 24)
+K1 :: (in 8 5 5)
+B1 :: (in 8)
+K2 :: (in 16 8 5 5)
+B2 :: (in 16)
+W :: (in 10 16 1 4 4)
+B :: (in 10)
+Conv1 :: (out 8 24 24)
+Relu1 :: (out 8 24 24)
+Pool1 :: (out 8 12 12)
+Conv2 :: (out 16 1 12 12)
+Relu2 :: (out 16 1 12 12)
+Pool2 :: (out 16 1 4 4)
+FC :: (out 10)
+Output :: (out 10)
+
+relu"0 := (0.0 >. y)
+ratio"1 := (y / ((reduce 1 +) y))
+
+Conv1 := ((((trim 2 2)"2) (((oblique 2 +)"4) (K1 ((*"2 0)"2 2) Input))) + B1)
+Relu1 := (relu Conv1)
+Pool1 := (((stride 2 2)"2) (((trim 1 1)"2) (((oblique 2 >.)"4) (((duplicate 2 2)"0) Relu1))))
+
+Conv2 := ((((trim 7 2 2)"3) (((oblique 3 +)"6)  (K2 ((*"3 0)"3 3) Pool1))) + B2)
+Relu2 := (relu Conv2)
+Pool2 := (((stride 3 3)"2) (((trim 2 2)"2) (((oblique 2 >.)"4) (((duplicate 3 3)"0) Relu2))))
+
+FC := ((((reduce 4 +)"4) (W (*"4 4) Pool2)) + B)
+
+Max := ((reduce 1 >.) FC)
+Output := (ratio (exp (FC - Max)))
