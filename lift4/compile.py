@@ -59,6 +59,17 @@ def get_uses(expr):
         raise NotImplementedError
 
 
+def subtract_expr(expr, domain):
+    if expr[0] == 'var':
+        return ('var', expr[1].subtract_domain(domain))
+    elif expr[0] == 'const':
+        return expr
+    elif expr[0] == 'call':
+        return (expr[0],expr[1], tuple(subtract_expr(e,domain) for e in expr[2]))
+    else:
+        raise NotImplementedError
+
+
 class Statements(dict):
 
     def __init__(self, ctx):
@@ -67,6 +78,16 @@ class Statements(dict):
     def add(self, stmt):
         name = self.ctx.new_stmt_name()
         self[name] = rename_stmt(stmt, name)
+
+    def subtract(self, domain):
+        name = domain.get_tuple_name()
+        stmt = self[name]
+        dest = stmt[0].subtract_domain(domain)
+        if dest.is_empty():
+            del self[name]
+        else:
+            self[name] = (dest, subtract_expr(stmt[1], domain))
+
 
     def get_assign_map(self):
         return self.union_maps(s[0] for s in self.values())
