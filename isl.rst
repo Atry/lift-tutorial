@@ -70,4 +70,10 @@ interpretation. For example, :code:`compile_monad`
 
 
 Once all statements are transformed, we use integer set library to
-compute a schedule.
+compute a schedule, which will assign a time to each statement. So
+that we know when should execute a statement. All use of an element of
+a array should be scheduled after it is defined. For reduction arrays,
+update statements should be scheduled after init statements, and fini
+statements should be scheduled after update statements. Then we use
+the schedule to build AST, and expand all statements with their
+definitions.

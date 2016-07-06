@@ -27,4 +27,6 @@ gradient based optimization.
 * `convolution <conv.rst>`_
 
 If you have any questions, find any mistakes or have any suggestions,
-feel free to open an issue of pull request.
+feel free to open an `issue`__ or send a pull request.
+
+.. __: https://github.com/bhuztez/lift-tutorial/issues
