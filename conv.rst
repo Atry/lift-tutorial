@@ -2,6 +2,8 @@
 convolution
 ===========
 
+Rather than a single operator do all the work, we split the
+functionality of convolution into a few simple operators.
 
 .. code::
 
@@ -23,3 +25,7 @@ Oblique in LiFT in different direction than in J.
 
     1 2 3
     0 1 2
+
+As reduce, oblique has been extended to multiple dimensions, and
+compiles to reduction array.
+
