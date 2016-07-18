@@ -10,6 +10,10 @@ made naming a lot easier. If you are working on something inspired by
 X and Y, and cannot think of a good name, just call it X Flavoured Y,
 problem solved.
 
+We show throughout this tutorial, by adopting rank of function from J
+and piggybacking on integer set library, a neural network framework
+could be built with much less effort.
+
 LiFT can be served as a good starting point of your full-fledged
 neural network framework. And LiFT does not limit itself to neural
 network, it could also be a good choice if you need tensor and

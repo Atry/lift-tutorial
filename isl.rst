@@ -72,8 +72,22 @@ interpretation. For example, :code:`compile_monad`
 Once all statements are transformed, we use integer set library to
 compute a schedule, which will assign a time to each statement. So
 that we know when should execute a statement. All use of an element of
-a array should be scheduled after it is defined. For reduction arrays,
-update statements should be scheduled after init statements, and fini
-statements should be scheduled after update statements. Then we use
-the schedule to build AST, and expand all statements with their
-definitions.
+an array should be scheduled after it is defined. For reduction
+arrays, update statements should be scheduled after init statements,
+and fini statements should be scheduled after update statements.
+
+.. code::
+
+    def_map = ctx.def_stmts.get_assign_map().union(ctx.fini_stmts.get_assign_map())
+    init_map = ctx.init_stmts.get_assign_map()
+    update_map = ctx.update_stmts.get_assign_map()
+
+    use_map = ctx.get_use_map()
+
+    validity = (
+        def_map.apply_range(use_map.reverse())
+        .union(init_map.apply_range(update_map.reverse()))
+        .union(update_map.apply_range(def_map.reverse())))
+
+Then we use the schedule to build AST, and expand all statements with
+their definitions.
