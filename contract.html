@@ -1,0 +1,75 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils 0.12: http://docutils.sourceforge.net/" />
+<title>array contraction</title>
+<link rel="stylesheet" href="html4css1.css" type="text/css" />
+</head>
+<body>
+<div class="document" id="array-contraction">
+<h1 class="title">array contraction</h1>
+
+<p>You must have noticed that there are too many unnecessary intermediate
+arrays. With precise relationship between statement and array element
+at hand, we can find out and eliminate them.</p>
+<p>For example, <code>A</code> is input, <code>C</code> is output, we want to
+eliminate B. We assume one statement access to at most one element of
+an array here.</p>
+<pre class="code literal-block">
+({S1[i] -&gt; B[i] : 0 &lt;= i &lt; 2},
+ (var, {S1[i] -&gt; A[i] : 0 &lt;= i &lt; 2}))
+
+({S2[i] -&gt; C[i] : 0 &lt;= i &lt; 2},
+ (var, {S2[i] -&gt; B[i] : 0 &lt;= i &lt; 2}))
+</pre>
+<p>First we find out all intermediate arrays which all its elements has
+been used once or less.</p>
+<pre class="code literal-block">
+def find_contractible():
+    reduction_arrays = ctx.fini_stmts.get_assign_map().range()
+    use_map = ctx.get_use_map()
+
+    for k, v in ctx.intermediate_arrays.items():
+        if not v.intersect(reduction_arrays).is_empty():
+            continue
+
+        uses = use_map.intersect_range(v)
+        if not uses.is_injective():
+            continue
+
+        return k, uses
+</pre>
+<p>we get</p>
+<pre class="code literal-block">
+(S2, {S2[i] -&gt; B[i] : 0 &lt;= i &lt; 2})
+</pre>
+<p>Then we find out the statement which defined the element used here.</p>
+<pre class="code literal-block">
+m, = to_maps(uses.intersect_domain(domain))
+maps = to_maps(m.apply_range(defined_by))
+
+for stmt_map in maps:
+    assert not stmt_map.is_empty()
+
+    stmt_domain = stmt_map.domain()
+    name = stmt_domain.get_tuple_name()
+    stmt = ctx.def_stmts.get(name, ctx.update_stmts.get(name, None))
+</pre>
+<pre class="code literal-block">
+({S1[i] -&gt; B[i] : 0 &lt;= i &lt; 2},
+ (var, {S1[i] -&gt; A[i] : 0 &lt;= i &lt; 2}))
+</pre>
+<p>Replace B in S2 by definition</p>
+<pre class="code literal-block">
+{S2[i] -&gt; S1[i] : 0 &lt;= i &lt; 2} * {S1[i] -&gt; A[i] : 0 &lt;= i &lt; 2}
+{S2[i] -&gt; A[i] : 0 &lt; i &lt; 2}
+</pre>
+<p>Thus we eliminated B.</p>
+<pre class="code literal-block">
+({S2[i] -&gt; C[i] : 0 &lt;= i &lt; 2},
+ (var, {S2[i] -&gt; A[i] : 0 &lt;= i &lt; 2}))
+</pre>
+</div>
+</body>
+</html>

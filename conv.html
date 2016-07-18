@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils 0.12: http://docutils.sourceforge.net/" />
+<title>convolution</title>
+<link rel="stylesheet" href="html4css1.css" type="text/css" />
+</head>
+<body>
+<div class="document" id="convolution">
+<h1 class="title">convolution</h1>
+
+<p>Rather than a single operator do all the work, we split the
+functionality of convolution into a few simple operators.</p>
+<pre class="code literal-block">
+Conv1 := ((((trim 2 2)&quot;2) (((oblique 2 +)&quot;4) (K1 ((*&quot;2 0)&quot;2 2) Input))) + B1)
+</pre>
+<p>and pooling shares the same operators.</p>
+<pre class="code literal-block">
+Pool1 := (((stride 2 2)&quot;2) (((trim 1 1)&quot;2) (((oblique 2 &gt;.)&quot;4) (((duplicate 2 2)&quot;0) Relu1))))
+</pre>
+<p>Oblique in LiFT in different direction than in J.</p>
+<pre class="code literal-block">
+J
+
+0 1 2
+1 2 3
+
+LiFT
+
+1 2 3
+0 1 2
+</pre>
+<p>As with reduce, oblique has been extended to multiple dimensions, and
+compiles to reduction array.</p>
+<p>Trim operator cuts from both ends.</p>
+<pre class="code literal-block">
+(trim 1) 1 2 3 4 5
+2 3 4
+
+(trim 2) 1 2 3 4 5
+3
+</pre>
+<p>Stride</p>
+<pre class="code literal-block">
+(stride 2) 1 2 3 4 5
+1 3 5
+(stride 4) 1 2 3 4 5
+1 5
+</pre>
+</div>
+</body>
+</html>

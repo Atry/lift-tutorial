@@ -1,0 +1,132 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils 0.12: http://docutils.sourceforge.net/" />
+<title>shape checking</title>
+<link rel="stylesheet" href="html4css1.css" type="text/css" />
+</head>
+<body>
+<div class="document" id="shape-checking">
+<h1 class="title">shape checking</h1>
+
+<p>declare inputs and outputs with their shapes.</p>
+<pre class="code literal-block">
+Input :: (in 2)
+W1 :: (in 2 2)
+B1 :: (in)
+W2 :: (in 2 2)
+B2 :: (in)
+Output :: (out 2)
+</pre>
+<p>Unlike J, we use rank to distinguish between definition of monad, dyad
+and array. We don't have operator precedence in LiFT. You should
+always use parenthesis. This is why it is lisp flavoured.</p>
+<pre class="code literal-block">
+sigmoid&quot;0 := (1 / ((exp (0 - y)) + 1))
+dot&quot;1 1 := ((reduce 1 +) (x * y))
+
+Hidden := (sigmoid ((W1 dot Input) + B1))
+Output := (sigmoid ((W2 dot Hidden) + B2))
+</pre>
+<p>In the definition of a monad, <code>y</code> means the argument. While in
+the definition of a dyad, <code>x</code> means the left argument, <code>y</code>
+means the right argument.</p>
+<p>We have extended reduce (called insert in J) to multiple
+dimensions. <code>(reduce 1 +)</code> means 1-dimension reduce, is
+equivalent to <code>+/</code> of J.</p>
+<p>Shape is checked when a new declaration or definition added to symbol
+table. If we could not find a symbol in the symbols, we would try to
+find it in the declarations, see if it is an input.</p>
+<pre class="code literal-block">
+class Table(object):
+
+    def __init__(self, default):
+        self.next_var_id = 0
+        self.declarations = {}
+        self.vars = {}
+        self.symbols = default.copy()
+
+    def check_shape(self, name):
+        v = self.symbols[name]
+        assert self.declarations[name].shape == self.vars[v].shape, &quot;shape of symbol '%s' does not match with declaration&quot; % (name,)
+
+    def add_declaration(self, name, value):
+        assert name not in self.declarations, &quot;'%s' already declared&quot; % (name,)
+        self.declarations[name] = value
+
+        if name in self.symbols:
+            self.check_shape(name)
+
+    def add_var(self, value):
+        name = &quot;v&quot;+str(self.next_var_id)
+        self.next_var_id += 1
+        self.vars[name] = value
+        return name
+
+    def itervars(self):
+        for i in xrange(self.next_var_id):
+            yield &quot;v&quot; + str(i)
+
+    def add_symbol(self, name, value):
+        assert name not in self.symbols, &quot;symbol '%s' already defined&quot; % (name,)
+        self.symbols[name] = value
+
+        if name in self.declarations:
+            self.check_shape(name)
+
+    def get_symbol(self, name):
+        v = self.symbols.get(name, None)
+        if v is None:
+            d = self.declarations.get(name, None)
+            assert d is not None, &quot;'%s' is not defined&quot; % (name,)
+            assert d.type == &quot;in&quot;, &quot;'%s' is not input&quot; % (name,)
+            v = self.add_var(d)
+            self.add_symbol(name, v)
+        return v
+</pre>
+<p>We use the same <code>Array</code>, <code>interp_monad</code>,
+<code>interp_dyad</code> as <code>rank.py</code> here. So after shape checking,
+we transform the statements into a simpler form which is also required
+by our implementation of reverse mode automatic differentiation.</p>
+<p>Let's calculate the output.</p>
+<pre class="code literal-block">
+from lift1.parser import Parser
+from lift1.check import check_stmts
+from lift1.interp import interp
+from lift1.interp import Array
+
+p = Parser(filename='&lt;string&gt;')
+
+SOURCE = (
+&quot;&quot;&quot;
+Input :: (in 2)
+W1 :: (in 2 2)
+B1 :: (in)
+W2 :: (in 2 2)
+B2 :: (in)
+Output :: (out 2)
+
+sigmoid&quot;0 := (1 / ((exp (0 - y)) + 1))
+dot&quot;1 1 := ((reduce 1 +) (x * y))
+
+Hidden := (sigmoid ((W1 dot Input) + B1))
+Output := (sigmoid ((W2 dot Hidden) + B2))
+&quot;&quot;&quot;)
+
+
+table = check_stmts(p.parse(SOURCE))
+values = interp(
+    table,
+    W1 = Array((2,2), [0.15,0.20,0.25,0.30]),
+    B1 = Array((), [0.35]),
+    W2 = Array((2,2), [0.40,0.45,0.50,0.55]),
+    B2 = Array((), [0.60]),
+    Input = Array((2,), [0.05,0.10]))
+
+assert (values[table.symbols[&quot;Output&quot;]]
+        .allclose(Array((2,), [0.75136507,0.772928465])))
+</pre>
+</div>
+</body>
+</html>

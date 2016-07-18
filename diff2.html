@@ -1,0 +1,354 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils 0.12: http://docutils.sourceforge.net/" />
+<title>backpropagation</title>
+<link rel="stylesheet" href="math.css" type="text/css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.css" type="text/css" />
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.js"></script>
+<script type="text/javascript" src="render.js"></script>
+<link rel="stylesheet" href="html4css1.css" type="text/css" />
+</head>
+<body>
+<div class="document" id="backpropagation">
+<h1 class="title">backpropagation</h1>
+
+<p>Now it's time to calculate gradient. For simplicity, only scalar
+variables are allowed, and we calculate the first order derivatives
+only.</p>
+<p>We use a special declaration <code>(grad x y)</code> to represent the
+derivative of <code>x</code> with respect to <code>y</code>.</p>
+<pre class="code literal-block">
+Input :: (in 2)
+W1 :: (in 2 2)
+B1 :: (in)
+W2 :: (in 2 2)
+B2 :: (in)
+Output :: (out 2)
+
+sigmoid&quot;0 := (1 / ((exp (0 - y)) + 1))
+dot&quot;1 1 := ((reduce 1 +) (x * y))
+
+Hidden := (sigmoid ((W1 dot Input) + B1))
+Output := (sigmoid ((W2 dot Hidden) + B2))
+
+Target :: (in 2)
+Loss :: (out)
+
+Loss := ((reduce 1 +) (0.5 * ((Target - Output) ** 2)))
+
+dW1 :: (grad Loss W1)
+dW2 :: (grad Loss W2)
+
+nW1 :: (out 2 2)
+nW2 :: (out 2 2)
+
+nW1 := (W1 - (0.5 * dW1))
+nW2 := (W2 - (0.5 * dW2))
+</pre>
+<div alt="\begin{array}{rclcrcl} Z &amp;=&amp; F + G &amp;,&amp; \frac{\partial Z}{\partial X} &amp;=&amp; \frac{\partial F}{\partial X} + \frac{\partial G}{\partial X} \\ Z &amp;=&amp; F - G &amp;,&amp; \frac{\partial Z}{\partial X} &amp;=&amp; \frac{\partial F}{\partial X} - \frac{\partial G}{\partial X} \\ Z &amp;=&amp; F \cdot G &amp;,&amp; \frac{\partial Z}{\partial X} &amp;=&amp; G \cdot \frac{\partial F}{\partial X} + F \cdot \frac{\partial G}{\partial X} \\ Z &amp;=&amp; F \div G &amp;,&amp; \frac{\partial Z}{\partial X} &amp;=&amp; \frac{1}{G} \cdot \frac{\partial F}{\partial X} - \frac{F}{G^2} \cdot \frac{\partial G}{\partial X} \\ Z &amp;=&amp; F^G &amp;,&amp; \frac{\partial Z}{\partial X} &amp;=&amp; F^G \cdot (\frac{G}{F} \cdot \frac{\partial F}{\partial X} + \ln F \cdot \frac{\partial G}{\partial X}) \end{array}" class="formula">
+<span class="array"><span class="arrayrow">
+<span class="arraycell align-r">
+<i>Z</i>
+</span>
+<span class="arraycell align-c">
+ = 
+</span>
+<span class="arraycell align-l">
+<i>F</i> + <i>G</i>
+</span>
+<span class="arraycell align-c">
+, 
+</span>
+<span class="arraycell align-r">
+<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>Z</i></span><span class="ignored">)/(</span><span class="denominator">∂<i>X</i></span><span class="ignored">)</span></span>
+</span>
+<span class="arraycell align-c">
+ = 
+</span>
+<span class="arraycell align-l">
+<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>F</i></span><span class="ignored">)/(</span><span class="denominator">∂<i>X</i></span><span class="ignored">)</span></span> + <span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>G</i></span><span class="ignored">)/(</span><span class="denominator">∂<i>X</i></span><span class="ignored">)</span></span>
+</span>
+
+</span>
+<span class="arrayrow">
+<span class="arraycell align-r">
+ 
+</span>
+<span class="arraycell align-c">
+ 
+</span>
+<span class="arraycell align-l">
+ 
+</span>
+<span class="arraycell align-c">
+ 
+</span>
+<span class="arraycell align-r">
+ 
+</span>
+<span class="arraycell align-c">
+ 
+</span>
+<span class="arraycell align-l">
+ 
+</span>
+
+</span>
+<span class="arrayrow">
+<span class="arraycell align-r">
+<i>Z</i>
+</span>
+<span class="arraycell align-c">
+ = 
+</span>
+<span class="arraycell align-l">
+<i>F</i> − <i>G</i>
+</span>
+<span class="arraycell align-c">
+, 
+</span>
+<span class="arraycell align-r">
+<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>Z</i></span><span class="ignored">)/(</span><span class="denominator">∂<i>X</i></span><span class="ignored">)</span></span>
+</span>
+<span class="arraycell align-c">
+ = 
+</span>
+<span class="arraycell align-l">
+<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>F</i></span><span class="ignored">)/(</span><span class="denominator">∂<i>X</i></span><span class="ignored">)</span></span> − <span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>G</i></span><span class="ignored">)/(</span><span class="denominator">∂<i>X</i></span><span class="ignored">)</span></span>
+</span>
+
+</span>
+<span class="arrayrow">
+<span class="arraycell align-r">
+ 
+</span>
+<span class="arraycell align-c">
+ 
+</span>
+<span class="arraycell align-l">
+ 
+</span>
+<span class="arraycell align-c">
+ 
+</span>
+<span class="arraycell align-r">
+ 
+</span>
+<span class="arraycell align-c">
+ 
+</span>
+<span class="arraycell align-l">
+ 
+</span>
+
+</span>
+<span class="arrayrow">
+<span class="arraycell align-r">
+<i>Z</i>
+</span>
+<span class="arraycell align-c">
+ = 
+</span>
+<span class="arraycell align-l">
+<i>F</i>⋅<i>G</i>
+</span>
+<span class="arraycell align-c">
+, 
+</span>
+<span class="arraycell align-r">
+<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>Z</i></span><span class="ignored">)/(</span><span class="denominator">∂<i>X</i></span><span class="ignored">)</span></span>
+</span>
+<span class="arraycell align-c">
+ = 
+</span>
+<span class="arraycell align-l">
+<i>G</i>⋅<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>F</i></span><span class="ignored">)/(</span><span class="denominator">∂<i>X</i></span><span class="ignored">)</span></span> + <i>F</i>⋅<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>G</i></span><span class="ignored">)/(</span><span class="denominator">∂<i>X</i></span><span class="ignored">)</span></span>
+</span>
+
+</span>
+<span class="arrayrow">
+<span class="arraycell align-r">
+ 
+</span>
+<span class="arraycell align-c">
+ 
+</span>
+<span class="arraycell align-l">
+ 
+</span>
+<span class="arraycell align-c">
+ 
+</span>
+<span class="arraycell align-r">
+ 
+</span>
+<span class="arraycell align-c">
+ 
+</span>
+<span class="arraycell align-l">
+ 
+</span>
+
+</span>
+<span class="arrayrow">
+<span class="arraycell align-r">
+<i>Z</i>
+</span>
+<span class="arraycell align-c">
+ = 
+</span>
+<span class="arraycell align-l">
+<i>F</i>÷<i>G</i>
+</span>
+<span class="arraycell align-c">
+, 
+</span>
+<span class="arraycell align-r">
+<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>Z</i></span><span class="ignored">)/(</span><span class="denominator">∂<i>X</i></span><span class="ignored">)</span></span>
+</span>
+<span class="arraycell align-c">
+ = 
+</span>
+<span class="arraycell align-l">
+<span class="fraction"><span class="ignored">(</span><span class="numerator">1</span><span class="ignored">)/(</span><span class="denominator"><i>G</i></span><span class="ignored">)</span></span>⋅<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>F</i></span><span class="ignored">)/(</span><span class="denominator">∂<i>X</i></span><span class="ignored">)</span></span> − <span class="fraction"><span class="ignored">(</span><span class="numerator"><i>F</i></span><span class="ignored">)/(</span><span class="denominator"><i>G</i><sup>2</sup></span><span class="ignored">)</span></span>⋅<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>G</i></span><span class="ignored">)/(</span><span class="denominator">∂<i>X</i></span><span class="ignored">)</span></span>
+</span>
+
+</span>
+<span class="arrayrow">
+<span class="arraycell align-r">
+ 
+</span>
+<span class="arraycell align-c">
+ 
+</span>
+<span class="arraycell align-l">
+ 
+</span>
+<span class="arraycell align-c">
+ 
+</span>
+<span class="arraycell align-r">
+ 
+</span>
+<span class="arraycell align-c">
+ 
+</span>
+<span class="arraycell align-l">
+ 
+</span>
+
+</span>
+<span class="arrayrow">
+<span class="arraycell align-r">
+<i>Z</i>
+</span>
+<span class="arraycell align-c">
+ = 
+</span>
+<span class="arraycell align-l">
+<i>F</i><sup><i>G</i></sup>
+</span>
+<span class="arraycell align-c">
+, 
+</span>
+<span class="arraycell align-r">
+<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>Z</i></span><span class="ignored">)/(</span><span class="denominator">∂<i>X</i></span><span class="ignored">)</span></span>
+</span>
+<span class="arraycell align-c">
+ = 
+</span>
+<span class="arraycell align-l">
+<i>F</i><sup><i>G</i></sup>⋅(<span class="fraction"><span class="ignored">(</span><span class="numerator"><i>G</i></span><span class="ignored">)/(</span><span class="denominator"><i>F</i></span><span class="ignored">)</span></span>⋅<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>F</i></span><span class="ignored">)/(</span><span class="denominator">∂<i>X</i></span><span class="ignored">)</span></span> + ln<i>F</i>⋅<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>G</i></span><span class="ignored">)/(</span><span class="denominator">∂<i>X</i></span><span class="ignored">)</span></span>)
+</span>
+
+</span>
+</span>
+</div>
+<p>They are all in the form of <span alt="A \cdot \frac{\partial F}{\partial X} + B \cdot \frac{\partial G}{\partial X}" class="formula">
+<i>A</i>⋅<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>F</i></span><span class="ignored">)/(</span><span class="denominator">∂<i>X</i></span><span class="ignored">)</span></span> + <i>B</i>⋅<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>G</i></span><span class="ignored">)/(</span><span class="denominator">∂<i>X</i></span><span class="ignored">)</span></span></span>
+. Instead of <span alt="Acc \cdot (A \cdot \frac{\partial F}{\partial X} + B \cdot \frac{\partial G}{\partial X})" class="formula">
+<i>Acc</i>⋅(<i>A</i>⋅<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>F</i></span><span class="ignored">)/(</span><span class="denominator">∂<i>X</i></span><span class="ignored">)</span></span> + <i>B</i>⋅<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>G</i></span><span class="ignored">)/(</span><span class="denominator">∂<i>X</i></span><span class="ignored">)</span></span>)</span>
+, we calculate <span alt="(Acc \cdot A) \cdot \frac{\partial F}{\partial X} + (Acc \cdot B) \cdot \frac{\partial G}{\partial X}" class="formula">
+(<i>Acc</i>⋅<i>A</i>)⋅<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>F</i></span><span class="ignored">)/(</span><span class="denominator">∂<i>X</i></span><span class="ignored">)</span></span> + (<i>Acc</i>⋅<i>B</i>)⋅<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>G</i></span><span class="ignored">)/(</span><span class="denominator">∂<i>X</i></span><span class="ignored">)</span></span></span>
+. This is how backpropagation works. Backpropagation is
+just a kind of reverse mode automatic differentiation. Here, we use
+the backpropagation algorithm to calculate the gradient.</p>
+<pre class="code literal-block">
+def get_use_graph(self, v):
+    graph = self.use_graphs.get(v, None)
+    if graph is None:
+        assert self.vars[v].shape == ()
+        graph = {}
+
+        visited = set()
+        queue = [v]
+
+        while queue:
+            u = queue.pop(0)
+            if u in visited:
+                continue
+            visited.add(u)
+            var = self.vars[u]
+
+            if isinstance(var, ApplyMonad):
+                queue.append(var.y)
+                graph[var.y] = graph.get(var.y,())+((u,'y'),)
+            elif isinstance(var, ApplyDyad):
+                queue.append(var.x)
+                queue.append(var.y)
+                graph[var.x] = graph.get(var.x,())+((u,'x'),)
+                graph[var.y] = graph.get(var.y,())+((u,'y'),)
+            elif isinstance(var, Literal):
+                pass
+            elif isinstance(var, Argument):
+                pass
+            else:
+                raise NotImplementedError
+
+        self.use_graphs[v] = graph
+
+    return graph
+</pre>
+<p>Unlike those frameworks with layers, only slight modification is
+needed to change forward code to backward. For example,
+<code>interp_monad</code></p>
+<pre class="code literal-block">
+def interp_acc_monad(op, ranks, sy, vy, vz, acc, vg):
+    if not ranks:
+        ry = op.rank
+        inner = op.interp_acc_y
+    else:
+        ry = ranks[-1]
+        def inner(sy, vy, vz, acc, vg):
+            interp_acc_monad(op, ranks[:-1], sy, vy, vz, acc, vg)
+
+    if ry is None:
+        ry = len(sy)
+
+    p = product(sy[ry:])
+    for i in xrange(p):
+        inner(sy[:ry], vy.subview(i, p),
+              vz.subview(i, p),
+              acc.subview(i, p),
+              vg.subview(i, p))
+</pre>
+<p>Here is the remaining values.</p>
+<pre class="code literal-block">
+assert (values[table.symbols[&quot;Loss&quot;]]
+        .allclose(Array((), [0.298371109])))
+
+assert (values[table.symbols[&quot;nW1&quot;]]
+        .allclose(
+            Array((2,2),
+                  [0.149780716, 0.19956143, 0.24975114, 0.29950229])))
+
+assert (values[table.symbols[&quot;nW2&quot;]]
+        .allclose(
+            Array((2,2),
+                  [0.35891648, 0.408666186, 0.511301270, 0.561370121])))
+</pre>
+</div>
+</body>
+</html>

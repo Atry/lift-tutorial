@@ -1,0 +1,588 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils 0.12: http://docutils.sourceforge.net/" />
+<title>automatic differentiation</title>
+<link rel="stylesheet" href="math.css" type="text/css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.css" type="text/css" />
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.js"></script>
+<script type="text/javascript" src="render.js"></script>
+<link rel="stylesheet" href="html4css1.css" type="text/css" />
+</head>
+<body>
+<div class="document" id="automatic-differentiation">
+<h1 class="title">automatic differentiation</h1>
+
+<p>There are many good introductions to automatic differentiation you can
+find on the internet. But many of them talk about forward mode only,
+the others simply explain the tape structure which is for control
+structures. Since LiFT does not have any control structure,
+implementation of reverse mode could be as easy as forward mode.</p>
+<p>A simple example with only monads. <span alt="z = h(g(f(y)))" class="formula">
+<i>z</i> = <i>h</i>(<i>g</i>(<i>f</i>(<i>y</i>)))</span>
+ . First, we
+rewrite the equation, so that there is only one monad in each
+statement.</p>
+<div alt="\begin{array}{rcl} v_2 &amp;=&amp; f(v_1) \\ v_3 &amp;=&amp; g(v_2) \\ v_4 &amp;=&amp; h(v_3) \\ \end{array}" class="formula">
+<span class="array"><span class="arrayrow">
+<span class="arraycell align-r">
+<i>v</i><sub>2</sub>
+</span>
+<span class="arraycell align-c">
+ = 
+</span>
+<span class="arraycell align-l">
+<i>f</i>(<i>v</i><sub>1</sub>)
+</span>
+
+</span>
+<span class="arrayrow">
+<span class="arraycell align-r">
+ 
+</span>
+<span class="arraycell align-c">
+ 
+</span>
+<span class="arraycell align-l">
+ 
+</span>
+
+</span>
+<span class="arrayrow">
+<span class="arraycell align-r">
+<i>v</i><sub>3</sub>
+</span>
+<span class="arraycell align-c">
+ = 
+</span>
+<span class="arraycell align-l">
+<i>g</i>(<i>v</i><sub>2</sub>)
+</span>
+
+</span>
+<span class="arrayrow">
+<span class="arraycell align-r">
+ 
+</span>
+<span class="arraycell align-c">
+ 
+</span>
+<span class="arraycell align-l">
+ 
+</span>
+
+</span>
+<span class="arrayrow">
+<span class="arraycell align-r">
+<i>v</i><sub>4</sub>
+</span>
+<span class="arraycell align-c">
+ = 
+</span>
+<span class="arraycell align-l">
+<i>h</i>(<i>v</i><sub>3</sub>)
+</span>
+
+</span>
+<span class="arrayrow">
+<span class="arraycell align-r">
+ 
+</span>
+<span class="arraycell align-c">
+ 
+</span>
+<span class="arraycell align-l">
+ 
+</span>
+
+</span>
+<span class="arrayrow">
+<span class="arraycell align-r">
+
+</span>
+
+</span>
+</span>
+</div>
+<p>Then we follow the chain rule from outside to inside.</p>
+<div alt="\begin{array}{rcl} v_5 &amp;=&amp; \frac{\partial v_4}{\partial v_3} \\ v_6 &amp;=&amp; v_5 \cdot \frac{\partial v_3}{\partial v_2} = \frac{\partial v_4}{\partial v_3} \cdot \frac{\partial v_3}{\partial v_2} \\ v_7 &amp;=&amp; v_6 \cdot \frac{\partial v_2}{\partial v_1} = \frac{\partial v_4}{\partial v_3} \cdot \frac{\partial v_3}{\partial v_2} \cdot \frac{\partial v_2}{\partial v_1} = \frac{\partial v_4}{\partial v_1} \end{array}" class="formula">
+<span class="array"><span class="arrayrow">
+<span class="arraycell align-r">
+<i>v</i><sub>5</sub>
+</span>
+<span class="arraycell align-c">
+ = 
+</span>
+<span class="arraycell align-l">
+<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>v</i><sub>4</sub></span><span class="ignored">)/(</span><span class="denominator">∂<i>v</i><sub>3</sub></span><span class="ignored">)</span></span>
+</span>
+
+</span>
+<span class="arrayrow">
+<span class="arraycell align-r">
+ 
+</span>
+<span class="arraycell align-c">
+ 
+</span>
+<span class="arraycell align-l">
+ 
+</span>
+
+</span>
+<span class="arrayrow">
+<span class="arraycell align-r">
+<i>v</i><sub>6</sub>
+</span>
+<span class="arraycell align-c">
+ = 
+</span>
+<span class="arraycell align-l">
+<i>v</i><sub>5</sub>⋅<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>v</i><sub>3</sub></span><span class="ignored">)/(</span><span class="denominator">∂<i>v</i><sub>2</sub></span><span class="ignored">)</span></span> = <span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>v</i><sub>4</sub></span><span class="ignored">)/(</span><span class="denominator">∂<i>v</i><sub>3</sub></span><span class="ignored">)</span></span>⋅<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>v</i><sub>3</sub></span><span class="ignored">)/(</span><span class="denominator">∂<i>v</i><sub>2</sub></span><span class="ignored">)</span></span>
+</span>
+
+</span>
+<span class="arrayrow">
+<span class="arraycell align-r">
+ 
+</span>
+<span class="arraycell align-c">
+ 
+</span>
+<span class="arraycell align-l">
+ 
+</span>
+
+</span>
+<span class="arrayrow">
+<span class="arraycell align-r">
+<i>v</i><sub>7</sub>
+</span>
+<span class="arraycell align-c">
+ = 
+</span>
+<span class="arraycell align-l">
+<i>v</i><sub>6</sub>⋅<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>v</i><sub>2</sub></span><span class="ignored">)/(</span><span class="denominator">∂<i>v</i><sub>1</sub></span><span class="ignored">)</span></span> = <span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>v</i><sub>4</sub></span><span class="ignored">)/(</span><span class="denominator">∂<i>v</i><sub>3</sub></span><span class="ignored">)</span></span>⋅<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>v</i><sub>3</sub></span><span class="ignored">)/(</span><span class="denominator">∂<i>v</i><sub>2</sub></span><span class="ignored">)</span></span>⋅<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>v</i><sub>2</sub></span><span class="ignored">)/(</span><span class="denominator">∂<i>v</i><sub>1</sub></span><span class="ignored">)</span></span> = <span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>v</i><sub>4</sub></span><span class="ignored">)/(</span><span class="denominator">∂<i>v</i><sub>1</sub></span><span class="ignored">)</span></span>
+</span>
+
+</span>
+</span>
+</div>
+<p>An example with dyad, <span alt="i(h(f(x) + g(x)))" class="formula">
+<i>i</i>(<i>h</i>(<i>f</i>(<i>x</i>) + <i>g</i>(<i>x</i>)))</span>
+</p>
+<div alt="\begin{array}{rcl} v_2 &amp;=&amp; f(v_1) \\ v_3 &amp;=&amp; g(v_1) \\ v_4 &amp;=&amp; v_2 + v_3 \\ v_5 &amp;=&amp; h(v_4) \\ v_6 &amp;=&amp; i(v_5) \\ \end{array}" class="formula">
+<span class="array"><span class="arrayrow">
+<span class="arraycell align-r">
+<i>v</i><sub>2</sub>
+</span>
+<span class="arraycell align-c">
+ = 
+</span>
+<span class="arraycell align-l">
+<i>f</i>(<i>v</i><sub>1</sub>)
+</span>
+
+</span>
+<span class="arrayrow">
+<span class="arraycell align-r">
+ 
+</span>
+<span class="arraycell align-c">
+ 
+</span>
+<span class="arraycell align-l">
+ 
+</span>
+
+</span>
+<span class="arrayrow">
+<span class="arraycell align-r">
+<i>v</i><sub>3</sub>
+</span>
+<span class="arraycell align-c">
+ = 
+</span>
+<span class="arraycell align-l">
+<i>g</i>(<i>v</i><sub>1</sub>)
+</span>
+
+</span>
+<span class="arrayrow">
+<span class="arraycell align-r">
+ 
+</span>
+<span class="arraycell align-c">
+ 
+</span>
+<span class="arraycell align-l">
+ 
+</span>
+
+</span>
+<span class="arrayrow">
+<span class="arraycell align-r">
+<i>v</i><sub>4</sub>
+</span>
+<span class="arraycell align-c">
+ = 
+</span>
+<span class="arraycell align-l">
+<i>v</i><sub>2</sub> + <i>v</i><sub>3</sub>
+</span>
+
+</span>
+<span class="arrayrow">
+<span class="arraycell align-r">
+ 
+</span>
+<span class="arraycell align-c">
+ 
+</span>
+<span class="arraycell align-l">
+ 
+</span>
+
+</span>
+<span class="arrayrow">
+<span class="arraycell align-r">
+<i>v</i><sub>5</sub>
+</span>
+<span class="arraycell align-c">
+ = 
+</span>
+<span class="arraycell align-l">
+<i>h</i>(<i>v</i><sub>4</sub>)
+</span>
+
+</span>
+<span class="arrayrow">
+<span class="arraycell align-r">
+ 
+</span>
+<span class="arraycell align-c">
+ 
+</span>
+<span class="arraycell align-l">
+ 
+</span>
+
+</span>
+<span class="arrayrow">
+<span class="arraycell align-r">
+<i>v</i><sub>6</sub>
+</span>
+<span class="arraycell align-c">
+ = 
+</span>
+<span class="arraycell align-l">
+<i>i</i>(<i>v</i><sub>5</sub>)
+</span>
+
+</span>
+<span class="arrayrow">
+<span class="arraycell align-r">
+ 
+</span>
+<span class="arraycell align-c">
+ 
+</span>
+<span class="arraycell align-l">
+ 
+</span>
+
+</span>
+<span class="arrayrow">
+<span class="arraycell align-r">
+
+</span>
+
+</span>
+</span>
+</div>
+<p>calculation split into two branches since <span alt="v_4" class="formula">
+<i>v</i><sub>4</sub></span>
+ .</p>
+<div alt="\begin{array}{rcl} v_7 &amp;=&amp; \frac{\partial v_6}{\partial v_5} \\ v_8 &amp;=&amp; v_7 \cdot \frac{\partial v_5}{\partial v_4} = \frac{\partial v_6}{\partial v_5} \cdot \frac{\partial v_5}{\partial v_4} \\ v_9 &amp;=&amp; v_8 \cdot \frac{\partial v_4}{\partial v_2} = \frac{\partial v_6}{\partial v_5} \cdot \frac{\partial v_5}{\partial v_4} \cdot \frac{\partial v_4}{\partial v_2} \\ v_{10} &amp;=&amp; v_9 \cdot \frac{\partial v_2}{\partial v_1} = \frac{\partial v_6}{\partial v_5} \cdot \frac{\partial v_5}{\partial v_4} \cdot \frac{\partial v_4}{\partial v_2} \cdot \frac{\partial v_2}{\partial v_1} \\ v_{11} &amp;=&amp; v_8 \cdot \frac{\partial v_4}{\partial v_3} = \frac{\partial v_6}{\partial v_5} \cdot \frac{\partial v_5}{\partial v_4} \cdot \frac{\partial v_4}{\partial v_3} \\ v_{12} &amp;=&amp; v_{11} \cdot \frac{\partial v_3}{\partial v_1} = \frac{\partial v_6}{\partial v_5} \cdot \frac{\partial v_5}{\partial v_4} \cdot \frac{\partial v_4}{\partial v_3} \cdot \frac{\partial v_3}{\partial v_1} \\ v_{13} &amp;=&amp; v_{11} + v_{12} = \frac{\partial v_6}{\partial v_5} \cdot \frac{\partial v_5}{\partial v_4} \cdot \frac{\partial v_4}{\partial v_2} \cdot \frac{\partial v_2}{\partial v_1} + \frac{\partial v_6}{\partial v_5} \cdot \frac{\partial v_5}{\partial v_4} \cdot \frac{\partial v_4}{\partial v_3} \cdot \frac{\partial v_3}{\partial v_1} = \frac{\partial v_6}{\partial v_1} \\ \end{array}" class="formula">
+<span class="array"><span class="arrayrow">
+<span class="arraycell align-r">
+<i>v</i><sub>7</sub>
+</span>
+<span class="arraycell align-c">
+ = 
+</span>
+<span class="arraycell align-l">
+<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>v</i><sub>6</sub></span><span class="ignored">)/(</span><span class="denominator">∂<i>v</i><sub>5</sub></span><span class="ignored">)</span></span>
+</span>
+
+</span>
+<span class="arrayrow">
+<span class="arraycell align-r">
+ 
+</span>
+<span class="arraycell align-c">
+ 
+</span>
+<span class="arraycell align-l">
+ 
+</span>
+
+</span>
+<span class="arrayrow">
+<span class="arraycell align-r">
+<i>v</i><sub>8</sub>
+</span>
+<span class="arraycell align-c">
+ = 
+</span>
+<span class="arraycell align-l">
+<i>v</i><sub>7</sub>⋅<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>v</i><sub>5</sub></span><span class="ignored">)/(</span><span class="denominator">∂<i>v</i><sub>4</sub></span><span class="ignored">)</span></span> = <span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>v</i><sub>6</sub></span><span class="ignored">)/(</span><span class="denominator">∂<i>v</i><sub>5</sub></span><span class="ignored">)</span></span>⋅<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>v</i><sub>5</sub></span><span class="ignored">)/(</span><span class="denominator">∂<i>v</i><sub>4</sub></span><span class="ignored">)</span></span>
+</span>
+
+</span>
+<span class="arrayrow">
+<span class="arraycell align-r">
+ 
+</span>
+<span class="arraycell align-c">
+ 
+</span>
+<span class="arraycell align-l">
+ 
+</span>
+
+</span>
+<span class="arrayrow">
+<span class="arraycell align-r">
+<i>v</i><sub>9</sub>
+</span>
+<span class="arraycell align-c">
+ = 
+</span>
+<span class="arraycell align-l">
+<i>v</i><sub>8</sub>⋅<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>v</i><sub>4</sub></span><span class="ignored">)/(</span><span class="denominator">∂<i>v</i><sub>2</sub></span><span class="ignored">)</span></span> = <span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>v</i><sub>6</sub></span><span class="ignored">)/(</span><span class="denominator">∂<i>v</i><sub>5</sub></span><span class="ignored">)</span></span>⋅<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>v</i><sub>5</sub></span><span class="ignored">)/(</span><span class="denominator">∂<i>v</i><sub>4</sub></span><span class="ignored">)</span></span>⋅<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>v</i><sub>4</sub></span><span class="ignored">)/(</span><span class="denominator">∂<i>v</i><sub>2</sub></span><span class="ignored">)</span></span>
+</span>
+
+</span>
+<span class="arrayrow">
+<span class="arraycell align-r">
+ 
+</span>
+<span class="arraycell align-c">
+ 
+</span>
+<span class="arraycell align-l">
+ 
+</span>
+
+</span>
+<span class="arrayrow">
+<span class="arraycell align-r">
+<i>v</i><sub>10</sub>
+</span>
+<span class="arraycell align-c">
+ = 
+</span>
+<span class="arraycell align-l">
+<i>v</i><sub>9</sub>⋅<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>v</i><sub>2</sub></span><span class="ignored">)/(</span><span class="denominator">∂<i>v</i><sub>1</sub></span><span class="ignored">)</span></span> = <span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>v</i><sub>6</sub></span><span class="ignored">)/(</span><span class="denominator">∂<i>v</i><sub>5</sub></span><span class="ignored">)</span></span>⋅<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>v</i><sub>5</sub></span><span class="ignored">)/(</span><span class="denominator">∂<i>v</i><sub>4</sub></span><span class="ignored">)</span></span>⋅<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>v</i><sub>4</sub></span><span class="ignored">)/(</span><span class="denominator">∂<i>v</i><sub>2</sub></span><span class="ignored">)</span></span>⋅<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>v</i><sub>2</sub></span><span class="ignored">)/(</span><span class="denominator">∂<i>v</i><sub>1</sub></span><span class="ignored">)</span></span>
+</span>
+
+</span>
+<span class="arrayrow">
+<span class="arraycell align-r">
+ 
+</span>
+<span class="arraycell align-c">
+ 
+</span>
+<span class="arraycell align-l">
+ 
+</span>
+
+</span>
+<span class="arrayrow">
+<span class="arraycell align-r">
+<i>v</i><sub>11</sub>
+</span>
+<span class="arraycell align-c">
+ = 
+</span>
+<span class="arraycell align-l">
+<i>v</i><sub>8</sub>⋅<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>v</i><sub>4</sub></span><span class="ignored">)/(</span><span class="denominator">∂<i>v</i><sub>3</sub></span><span class="ignored">)</span></span> = <span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>v</i><sub>6</sub></span><span class="ignored">)/(</span><span class="denominator">∂<i>v</i><sub>5</sub></span><span class="ignored">)</span></span>⋅<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>v</i><sub>5</sub></span><span class="ignored">)/(</span><span class="denominator">∂<i>v</i><sub>4</sub></span><span class="ignored">)</span></span>⋅<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>v</i><sub>4</sub></span><span class="ignored">)/(</span><span class="denominator">∂<i>v</i><sub>3</sub></span><span class="ignored">)</span></span>
+</span>
+
+</span>
+<span class="arrayrow">
+<span class="arraycell align-r">
+ 
+</span>
+<span class="arraycell align-c">
+ 
+</span>
+<span class="arraycell align-l">
+ 
+</span>
+
+</span>
+<span class="arrayrow">
+<span class="arraycell align-r">
+<i>v</i><sub>12</sub>
+</span>
+<span class="arraycell align-c">
+ = 
+</span>
+<span class="arraycell align-l">
+<i>v</i><sub>11</sub>⋅<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>v</i><sub>3</sub></span><span class="ignored">)/(</span><span class="denominator">∂<i>v</i><sub>1</sub></span><span class="ignored">)</span></span> = <span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>v</i><sub>6</sub></span><span class="ignored">)/(</span><span class="denominator">∂<i>v</i><sub>5</sub></span><span class="ignored">)</span></span>⋅<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>v</i><sub>5</sub></span><span class="ignored">)/(</span><span class="denominator">∂<i>v</i><sub>4</sub></span><span class="ignored">)</span></span>⋅<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>v</i><sub>4</sub></span><span class="ignored">)/(</span><span class="denominator">∂<i>v</i><sub>3</sub></span><span class="ignored">)</span></span>⋅<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>v</i><sub>3</sub></span><span class="ignored">)/(</span><span class="denominator">∂<i>v</i><sub>1</sub></span><span class="ignored">)</span></span>
+</span>
+
+</span>
+<span class="arrayrow">
+<span class="arraycell align-r">
+ 
+</span>
+<span class="arraycell align-c">
+ 
+</span>
+<span class="arraycell align-l">
+ 
+</span>
+
+</span>
+<span class="arrayrow">
+<span class="arraycell align-r">
+<i>v</i><sub>13</sub>
+</span>
+<span class="arraycell align-c">
+ = 
+</span>
+<span class="arraycell align-l">
+<i>v</i><sub>11</sub> + <i>v</i><sub>12</sub> = <span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>v</i><sub>6</sub></span><span class="ignored">)/(</span><span class="denominator">∂<i>v</i><sub>5</sub></span><span class="ignored">)</span></span>⋅<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>v</i><sub>5</sub></span><span class="ignored">)/(</span><span class="denominator">∂<i>v</i><sub>4</sub></span><span class="ignored">)</span></span>⋅<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>v</i><sub>4</sub></span><span class="ignored">)/(</span><span class="denominator">∂<i>v</i><sub>2</sub></span><span class="ignored">)</span></span>⋅<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>v</i><sub>2</sub></span><span class="ignored">)/(</span><span class="denominator">∂<i>v</i><sub>1</sub></span><span class="ignored">)</span></span> + <span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>v</i><sub>6</sub></span><span class="ignored">)/(</span><span class="denominator">∂<i>v</i><sub>5</sub></span><span class="ignored">)</span></span>⋅<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>v</i><sub>5</sub></span><span class="ignored">)/(</span><span class="denominator">∂<i>v</i><sub>4</sub></span><span class="ignored">)</span></span>⋅<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>v</i><sub>4</sub></span><span class="ignored">)/(</span><span class="denominator">∂<i>v</i><sub>3</sub></span><span class="ignored">)</span></span>⋅<span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>v</i><sub>3</sub></span><span class="ignored">)/(</span><span class="denominator">∂<i>v</i><sub>1</sub></span><span class="ignored">)</span></span> = <span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>v</i><sub>6</sub></span><span class="ignored">)/(</span><span class="denominator">∂<i>v</i><sub>1</sub></span><span class="ignored">)</span></span>
+</span>
+
+</span>
+<span class="arrayrow">
+<span class="arraycell align-r">
+ 
+</span>
+<span class="arraycell align-c">
+ 
+</span>
+<span class="arraycell align-l">
+ 
+</span>
+
+</span>
+<span class="arrayrow">
+<span class="arraycell align-r">
+
+</span>
+
+</span>
+</span>
+</div>
+<p>We write expressions in prefix notation.</p>
+<pre class="code literal-block">
+1 + 2     -&gt;  ('+',  1,   2)
+v1 + v2   -&gt;  ('+', 'v1', 'v2')
+sin(v1)   -&gt;  ('sin', 'v1')
+</pre>
+<p>To reduce duplication, we will apply these rules before adding new
+variable, and will return the same variable id for same definition.</p>
+<pre class="code literal-block">
+add(+, 0, x) -&gt; x
+add(+, x, 0) -&gt; x
+add(*, 1, x) -&gt; x
+add(*, x, 1) -&gt; x
+add(*, 0, x) -&gt; 0
+add(*, x, 0) -&gt; 0
+</pre>
+<pre class="code literal-block">
+class Vars(object):
+
+    def __init__(self):
+        self.next_var_id = 1
+        self.defs = {}
+        self.lookup = {}
+
+    def add(self, *v):
+        name = self.lookup.get(v, None)
+        if name is None:
+            if v[0] == '+':
+                if v[1] == 0:
+                    return v[2]
+                elif v[2] == 0:
+                    return v[1]
+            elif v[0] == '*':
+                if v[1] == 1:
+                    return v[2]
+                elif v[2] == 1:
+                    return v[1]
+                elif v[1] == 0:
+                    return 0
+                elif v[2] == 0:
+                    return 0
+
+            name = &quot;v&quot; + str(self.next_var_id)
+            self.next_var_id += 1
+
+            self.defs[name] = v
+            self.lookup[v] = name
+
+        return name
+
+    def __getitem__(self, name):
+        return self.defs[name]
+</pre>
+<p>Differentiation is simply implemented by applying differentiation rules.</p>
+<pre class="code literal-block">
+def diff(vars, acc, v, w):
+    if v == w:
+        return acc
+
+    v = vars[v]
+    if v[0] == 'in':
+        return 0
+    elif v[0] == 'sin':
+        return diff(vars, vars.add('*', acc, vars.add('cos', v[1])), v[1], w)
+    elif v[0] == '+':
+        gx = diff(vars, acc, v[1], w)
+        gy = diff(vars, acc, v[2], w)
+        return vars.add('+', gx, gy)
+    elif v[0] == '*':
+        gx = diff(vars, vars.add('*', v[2], acc), v[1], w)
+        gy = diff(vars, vars.add('*', v[1], acc), v[2], w)
+        return vars.add('+', gx, gy)
+
+    raise NotImplementedError
+
+def autodiff(vars, v, *wrt):
+    return tuple(diff(vars, 1, v, w) for w in wrt)
+</pre>
+<p>An example taken from wikipedia, <span alt="z = (\sin x) + (x \cdot y)" class="formula">
+<i>z</i> = (sin<i>x</i>) + (<i>x</i>⋅<i>y</i>)</span>
+</p>
+<pre class="code literal-block">
+vars = Vars()
+
+x = vars.add('in', 'x')
+assert x == 'v1'
+assert vars['v1'] == ('in', 'x')
+
+y = vars.add('in', 'y')
+assert y == 'v2'
+assert vars['v2'] == ('in', 'y')
+
+z = vars.add('+', vars.add('*',x,y), vars.add('sin',x))
+assert z == 'v5'
+assert vars['v3'] == ('*', 'v1', 'v2')
+assert vars['v4'] == ('sin', 'v1')
+assert vars['v5'] == ('+', 'v3', 'v4')
+
+assert autodiff(vars, z, x, y) ==  ('v7', 'v1')
+assert vars['v6'] == ('cos', 'v1')
+assert vars['v7'] == ('+', 'v2', 'v6')
+</pre>
+</div>
+</body>
+</html>
